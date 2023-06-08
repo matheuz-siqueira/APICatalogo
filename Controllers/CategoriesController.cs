@@ -11,7 +11,7 @@ namespace APICatalogo.Controllers;
 public class CategoriesController : ControllerBase
 {
     private readonly Context _context;
-    public CategoriesController(Context context)
+    public CategoriesController([FromServices] Context context)
     {
         _context = context; 
     }
@@ -43,7 +43,7 @@ public class CategoriesController : ControllerBase
          
     }
 
-    [HttpGet("{id:int}", Name="GetCategory")]
+    [HttpGet("{id:int:min(1)}", Name="GetCategory")]
     public ActionResult<Category> GetById([FromRoute] int id)
     {
         try 
@@ -76,7 +76,7 @@ public class CategoriesController : ControllerBase
         
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:int:min(1)}")]
     public ActionResult<Category> PutCategory([FromRoute] int id, [FromBody] Category category)
     {
         if(id != category.Id)
