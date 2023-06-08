@@ -1,5 +1,3 @@
-using System;
-using System.Runtime.InteropServices;
 using APICatalogo.Data;
 using APICatalogo.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +10,7 @@ namespace APICatalogo.Controllers;
 public class ProductsController : ControllerBase
 {   
     private readonly Context _context;
-    public ProductsController(Context context)
+    public ProductsController([FromServices] Context context)
     {
         _context = context;
     }
@@ -30,7 +28,7 @@ public class ProductsController : ControllerBase
         }
     }
 
-    [HttpGet("{id:int}", Name="GetProduct")]
+    [HttpGet("{id:int:min(1)}", Name="GetProduct")]
     public ActionResult<Product> GetById([FromRoute] int id)
     {
         try
@@ -61,7 +59,7 @@ public class ProductsController : ControllerBase
         return new CreatedAtRouteResult("GetProduct", new {id = product.Id}, product);
     }
 
-    [HttpPut("{id:int}")]
+    [HttpPut("{id:int:min(1)}")]
     public ActionResult PutProduct([FromRoute] int id, [FromBody] Product product)
     {
         if(id != product.Id)
@@ -75,7 +73,7 @@ public class ProductsController : ControllerBase
         return Ok(product);
     }
 
-    [HttpDelete("{id:int}")]
+    [HttpDelete("{id:int:min(1)}")]
     public ActionResult DeleteProduct([FromRoute] int id) 
     {
         var product = _context.Products.FirstOrDefault(p => p.Id == id); 
