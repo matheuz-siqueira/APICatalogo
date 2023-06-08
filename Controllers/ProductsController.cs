@@ -4,7 +4,6 @@ using APICatalogo.Data;
 using APICatalogo.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace APICatalogo.Controllers;
 
@@ -23,23 +22,31 @@ public class ProductsController : ControllerBase
     {   
         try 
         {
-            return Ok(_context.Products.ToList());
+            return Ok(_context.Products.AsNoTracking().ToList());
         } 
         catch
         {
-            return NotFound(); 
+            return BadRequest("Erro ao tratar requisição."); 
         }
     }
 
     [HttpGet("{id:int}", Name="GetProduct")]
     public ActionResult<Product> GetById([FromRoute] int id)
     {
-        var response = _context.Products.FirstOrDefault(p => p.Id == id); 
-        if(response is null)
+        try
         {
-            return NotFound("Product not found.");
+            var response = _context.Products.AsNoTracking().FirstOrDefault(p => p.Id == id); 
+            if(response is null)
+            {
+                return NotFound("Produto não encontrado.");
+            } 
+            return response; 
         }
-        return response;    
+        catch
+        {
+            return BadRequest("Erro ao tratar requisição.");
+        }
+          
     } 
 
     [HttpPost]
@@ -74,7 +81,7 @@ public class ProductsController : ControllerBase
         var product = _context.Products.FirstOrDefault(p => p.Id == id); 
         if(product is null)
         {
-            return NotFound("Product not found."); 
+            return NotFound("Produto não encontrado."); 
         }
         _context.Remove(product); 
         _context.SaveChanges(); 

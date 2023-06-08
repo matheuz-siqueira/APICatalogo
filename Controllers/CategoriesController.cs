@@ -19,29 +19,53 @@ public class CategoriesController : ControllerBase
     [HttpGet] 
     public ActionResult<IEnumerable<Category>> GetCategories()
     {
-        return Ok (_context.Categories.ToList()); 
+        try 
+        {
+            return Ok (_context.Categories.AsNoTracking().ToList());
+        }
+        catch
+        {
+            return BadRequest("Erro ao tratar requisição."); 
+        }
     }
 
     [HttpGet("products")]
     public ActionResult<IEnumerable<Category>> GetCategoriesWithProducts()
     {
-        return _context.Categories.Include(c => c.Products).ToList(); 
+        try
+        {
+            return _context.Categories.AsNoTracking().Include(c => c.Products).ToList();
+        }
+        catch
+        {
+            return BadRequest("Erro ao tratar requisição"); 
+        }
+         
     }
 
     [HttpGet("{id:int}", Name="GetCategory")]
     public ActionResult<Category> GetById([FromRoute] int id)
     {
-        var category = _context.Categories.FirstOrDefault(c => c.Id == id); 
-        if(category is null)
+        try 
         {
-            return NotFound("Category not found.");
+            var category = _context.Categories.AsNoTracking().FirstOrDefault(c => c.Id == id); 
+            if(category is null)
+            {
+                return NotFound("Categoria não encontrada.");
+            }
+            return category;
         }
-        return category;
+        catch
+        {
+            return BadRequest("Erro ao tratar requisição");
+        }
+        
     }
 
     [HttpPost]
     public ActionResult PostCategory([FromBody] Category category)
     {
+        
         if(category is null)
         {
             return BadRequest(); 
@@ -49,6 +73,7 @@ public class CategoriesController : ControllerBase
         _context.Categories.Add(category); 
         _context.SaveChanges();
         return new CreatedAtRouteResult("GetCategory", new {id = category.Id}, category);
+        
     }
 
     [HttpPut("{id:int}")]
@@ -69,7 +94,7 @@ public class CategoriesController : ControllerBase
         var category = _context.Categories.FirstOrDefault(c => c.Id == id); 
         if(category is null)
         {
-            return NotFound("Category not found.");
+            return NotFound("Categoria não encontrada.");
         }
         _context.Remove(category);
         _context.SaveChanges(); 
