@@ -1,103 +1,75 @@
 using System.Data;
 using APICatalogo.Data;
 using APICatalogo.Models;
+using APICatalogo.Repositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers;
 
 [ApiController]
-[Route("categories")]
+[Route("api/categories")]
 public class CategoriesController : ControllerBase
 {
-    private readonly Context _context;
-    public CategoriesController([FromServices] Context context)
+    private readonly IUnityOfWork _uof;
+    public CategoriesController([FromServices] IUnityOfWork uof)
     {
-        _context = context; 
+        _uof = uof;  
     }
 
     [HttpGet] 
     public ActionResult<IEnumerable<Category>> GetCategories()
     {
-        try 
-        {
-            return Ok (_context.Categories.AsNoTracking().ToList());
-        }
-        catch
-        {
-            return BadRequest("Erro ao tratar requisição."); 
-        }
+        return _uof.CategoryRepository.Get().ToList(); 
     }
 
     [HttpGet("products")]
     public ActionResult<IEnumerable<Category>> GetCategoriesWithProducts()
     {
-        try
-        {
-            return _context.Categories.AsNoTracking().Include(c => c.Products).ToList();
-        }
-        catch
-        {
-            return BadRequest("Erro ao tratar requisição"); 
-        }
-         
+        return _uof.CategoryRepository.GetCategoriesProducts().ToList();
     }
 
-    [HttpGet("{id:int:min(1)}", Name="GetCategory")]
+    [HttpGet("{id:int}", Name="GetCategory")]
     public ActionResult<Category> GetById([FromRoute] int id)
     {
-        try 
-        {
-            var category = _context.Categories.AsNoTracking().FirstOrDefault(c => c.Id == id); 
-            if(category is null)
-            {
-                return NotFound("Categoria não encontrada.");
-            }
-            return category;
-        }
-        catch
-        {
-            return BadRequest("Erro ao tratar requisição");
-        }
-        
+        var category = _uof.CategoryRepository.GetById(c => c.Id == id); 
+        if(category is null)
+            return NotFound("Categoria não encotrada.");
+
+        return Ok(category);
     }
 
     [HttpPost]
     public ActionResult PostCategory([FromBody] Category category)
     {
-        
         if(category is null)
-        {
             return BadRequest(); 
-        }
-        _context.Categories.Add(category); 
-        _context.SaveChanges();
+
+        _uof.CategoryRepository.Add(category); 
+        _uof.Commit(); 
+
         return new CreatedAtRouteResult("GetCategory", new {id = category.Id}, category);
-        
     }
 
-    [HttpPut("{id:int:min(1)}")]
+    [HttpPut("{id:int}")]
     public ActionResult<Category> PutCategory([FromRoute] int id, [FromBody] Category category)
     {
         if(id != category.Id)
-        {
-            return BadRequest();
-        }
-        _context.Entry(category).State = EntityState.Modified; 
-        _context.SaveChanges(); 
+            return NotFound("Categoria não encontrada.");
+
+        _uof.CategoryRepository.Update(category);
+        _uof.Commit();
         return Ok(category);
     }
 
     [HttpDelete("{id:int}")]
     public ActionResult DeleteCategory([FromRoute] int id)
     {
-        var category = _context.Categories.FirstOrDefault(c => c.Id == id); 
+        var category = _uof.CategoryRepository.GetById(c => c.Id == id);  
         if(category is null)
-        {
             return NotFound("Categoria não encontrada.");
-        }
-        _context.Remove(category);
-        _context.SaveChanges(); 
+        
+        _uof.CategoryRepository.Delete(category);
+        _uof.Commit();
         return NoContent(); 
     }
 }

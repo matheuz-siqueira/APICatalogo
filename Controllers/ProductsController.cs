@@ -1,88 +1,71 @@
 using APICatalogo.Data;
 using APICatalogo.Models;
+using APICatalogo.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace APICatalogo.Controllers;
 
 [ApiController]
-[Route("products")]
+[Route("api/products")]
 public class ProductsController : ControllerBase
 {   
-    private readonly Context _context;
-    public ProductsController([FromServices] Context context)
+    private readonly IUnityOfWork _uof;
+    public ProductsController([FromServices] IUnityOfWork uof)
     {
-        _context = context;
+        _uof = uof;
+    }
+
+    [HttpGet("byprice")]
+    public ActionResult<IEnumerable<Product>> GetByPrice()
+    {
+        return _uof.ProductRepository.GetProductsByPrice().ToList();
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<Product>> GetProdutcts()
+    public ActionResult<IEnumerable<Product>> GetAll()
     {   
-        try 
-        {
-            return Ok(_context.Products.AsNoTracking().ToList());
-        } 
-        catch
-        {
-            return BadRequest("Erro ao tratar requisição."); 
-        }
+        return _uof.ProductRepository.Get().ToList();
     }
 
-    [HttpGet("{id:int:min(1)}", Name="GetProduct")]
+    [HttpGet("{id:int}", Name="GetProduct")]
     public ActionResult<Product> GetById([FromRoute] int id)
     {
-        try
-        {
-            var response = _context.Products.AsNoTracking().FirstOrDefault(p => p.Id == id); 
-            if(response is null)
-            {
-                return NotFound("Produto não encontrado.");
-            } 
-            return response; 
-        }
-        catch
-        {
-            return BadRequest("Erro ao tratar requisição.");
-        }
-          
+        var product = _uof.ProductRepository.GetById(p => p.Id == id); 
+        if(product is null)
+            return NotFound();
+        
+        return product;    
     } 
 
     [HttpPost]
     public ActionResult PostProduct([FromBody] Product product)
     {
-        if(product is null)
-        {
-            return BadRequest();
-        }
-        _context.Products.Add(product);
-        _context.SaveChanges(); 
-        return new CreatedAtRouteResult("GetProduct", new {id = product.Id}, product);
+        _uof.ProductRepository.Add(product);
+        _uof.Commit();
+        return new CreatedAtRouteResult("GetProduct", new { id = product.Id }, product); 
     }
 
-    [HttpPut("{id:int:min(1)}")]
+    [HttpPut("{id:int}")]
     public ActionResult PutProduct([FromRoute] int id, [FromBody] Product product)
     {
         if(id != product.Id)
-        {
             return BadRequest();
-        }
-
-        _context.Entry(product).State = EntityState.Modified;
-        _context.SaveChanges();
-
+        
+        _uof.ProductRepository.Update(product);
+        _uof.Commit();
         return Ok(product);
     }
 
-    [HttpDelete("{id:int:min(1)}")]
+    [HttpDelete("{id:int}")]
     public ActionResult DeleteProduct([FromRoute] int id) 
     {
-        var product = _context.Products.FirstOrDefault(p => p.Id == id); 
+        var product = _uof.ProductRepository.GetById(p => p.Id == id);
         if(product is null)
-        {
-            return NotFound("Produto não encontrado."); 
-        }
-        _context.Remove(product); 
-        _context.SaveChanges(); 
-        return Ok(); 
+            return NotFound();
+
+        _uof.ProductRepository.Delete(product);
+        _uof.Commit();
+        return NoContent(); 
     }
 }
