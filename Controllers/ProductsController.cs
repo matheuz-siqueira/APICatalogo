@@ -1,10 +1,11 @@
-using APICatalogo.Data;
 using APICatalogo.DTOs;
 using APICatalogo.Models;
+using APICatalogo.Pagination;
 using APICatalogo.Repositories;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace APICatalogo.Controllers;
 
@@ -29,9 +30,22 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<ProductDto>> GetAll()
+    public ActionResult<IEnumerable<ProductDto>> GetAll(
+        [FromQuery] ProductsParameters productsParameters)
     {   
-        var products = _uof.ProductRepository.Get().ToList();
+        var products = _uof.ProductRepository.GetProducts(productsParameters);
+        var metadata = new 
+        {
+            products.TotalCount,
+            products.PageSize,
+            products.CurrentPage,
+            products.TotalPages,
+            products.HasNext,
+            products.HasPrevious
+        };
+
+        Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
+
         return _mapper.Map<List<ProductDto>>(products); 
     }
 
