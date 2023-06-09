@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using APICatalogo.Data;
+using APICatalogo.Mapper;
 using APICatalogo.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,11 @@ builder.Services.AddControllers().AddJsonOptions(options =>
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped(provider => new AutoMapper.MapperConfiguration(cfg =>
+{
+    cfg.AddProfile(new MappingProfile());
+}).CreateMapper());
 
 var app = builder.Build();
 
