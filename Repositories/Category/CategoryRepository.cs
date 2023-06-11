@@ -8,14 +8,14 @@ public class CategoryRepository : Repository<Models.Category>, ICategoryReposito
 {
     public CategoryRepository(Context context) : base (context) {}
 
-    public PagedList<Models.Category> GetCategories(CategoriesParameters categoriesParameters)
+    public async Task<PagedList<Models.Category>> GetCategories(CategoriesParameters categoriesParameters)
     {
-        return PagedList<Models.Category>.ToPagedList(Get().OrderBy(on => on.Name),
+        return await PagedList<Models.Category>.ToPagedList(Get().OrderBy(on => on.Name),
                 categoriesParameters.PageNumber, categoriesParameters.PageSize);
     }
 
-    public IEnumerable<Models.Category> GetCategoriesProducts()
+    public async Task<IEnumerable<Models.Category>> GetCategoriesProducts()
     {
-        return Get().Include(c => c.Products);
+        return await Get().Include(c => c.Products).ToListAsync();
     }
 }

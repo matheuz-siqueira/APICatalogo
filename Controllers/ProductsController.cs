@@ -5,7 +5,6 @@ using APICatalogo.Repositories;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace APICatalogo.Controllers;
 
@@ -22,18 +21,18 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("byprice")]
-    public ActionResult<IEnumerable<ProductDto>> GetByPrice()
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetByPrice()
     {
-        var products = _uof.ProductRepository.GetProductsByPrice().ToList();
+        var products = await _uof.ProductRepository.GetProductsByPrice();
         return _mapper.Map<List<ProductDto>>(products); 
         
     }
 
     [HttpGet]
-    public ActionResult<IEnumerable<ProductDto>> GetAll(
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetAll(
         [FromQuery] ProductsParameters productsParameters)
     {   
-        var products = _uof.ProductRepository.GetProducts(productsParameters);
+        var products = await _uof.ProductRepository.GetProducts(productsParameters);
         var metadata = new 
         {
             products.TotalCount,
@@ -50,9 +49,9 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{id:int}", Name="GetProduct")]
-    public ActionResult<ProductDto> GetById([FromRoute] int id)
+    public async Task<ActionResult<ProductDto>> GetById([FromRoute] int id)
     {
-        var product = _uof.ProductRepository.GetById(p => p.Id == id); 
+        var product = await _uof.ProductRepository.GetById(p => p.Id == id); 
         if(product is null)
             return NotFound();
         
@@ -60,37 +59,37 @@ public class ProductsController : ControllerBase
     } 
 
     [HttpPost]
-    public ActionResult PostProduct([FromBody] ProductDto request)
+    public async Task<ActionResult> PostProduct([FromBody] ProductDto request)
     {
         var product = _mapper.Map<Product>(request);
         _uof.ProductRepository.Add(product);
-        _uof.Commit();
+        await _uof.Commit();
         var response = _mapper.Map<ProductDto>(product); 
         return new CreatedAtRouteResult("GetProduct", new { id = product.Id }, response); 
     }
 
     [HttpPut("{id:int}")]
-    public ActionResult PutProduct([FromRoute] int id, [FromBody] ProductDto request)
+    public async Task<ActionResult> PutProduct([FromRoute] int id, [FromBody] ProductDto request)
     {
         if(id != request.Id)
             return BadRequest();
         
         var product = _mapper.Map<Product>(request); 
         _uof.ProductRepository.Update(product);
-        _uof.Commit();
+        await _uof.Commit();
         var response = _mapper.Map<ProductDto>(product); 
         return Ok(response);
     }
 
     [HttpDelete("{id:int}")]
-    public ActionResult DeleteProduct([FromRoute] int id) 
+    public async Task<ActionResult> DeleteProduct([FromRoute] int id) 
     {
-        var product = _uof.ProductRepository.GetById(p => p.Id == id);
+        var product = await _uof.ProductRepository.GetById(p => p.Id == id);
         if(product is null)
             return NotFound();
 
         _uof.ProductRepository.Delete(product);
-        _uof.Commit();
+        await _uof.Commit();
         return NoContent(); 
     }
 }
