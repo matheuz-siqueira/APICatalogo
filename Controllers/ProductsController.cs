@@ -3,6 +3,8 @@ using APICatalogo.Models;
 using APICatalogo.Pagination;
 using APICatalogo.Repositories;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -10,6 +12,7 @@ namespace APICatalogo.Controllers;
 
 [ApiController]
 [Route("api/products")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class ProductsController : ControllerBase
 {   
     private readonly IUnityOfWork _uof;
