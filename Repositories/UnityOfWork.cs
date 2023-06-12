@@ -1,6 +1,7 @@
 using APICatalogo.Data;
 using APICatalogo.Repositories.Category;
 using APICatalogo.Repositories.Product;
+using APICatalogo.Repositories.User;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APICatalogo.Repositories;
@@ -8,8 +9,8 @@ namespace APICatalogo.Repositories;
 public class UnityOfWork : IUnityOfWork
 {
     private ProductRepository _productRepo; 
-    private CategoryRepository _categoryRepo; 
-
+    private CategoryRepository _categoryRepo;   
+    private UserRepository _userRepo;
     private Context _context;
     public UnityOfWork([FromServices] Context context)
     {
@@ -28,6 +29,14 @@ public class UnityOfWork : IUnityOfWork
         get
         {
             return _categoryRepo = _categoryRepo ?? new CategoryRepository(_context);
+        }
+    }
+
+    public IUserRepository UserRepository
+    {
+        get
+        {
+            return _userRepo = _userRepo ?? new UserRepository(_context); 
         }
     }
 
