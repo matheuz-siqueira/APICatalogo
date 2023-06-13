@@ -9,8 +9,9 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace APICatalogo.Controllers;
 
+[ApiVersion("1")]
 [ApiController]
-[Route("api/login")]
+[Route("api/v{version:apiVersion}/login")]
 public class LoginController : ControllerBase
 {
     private readonly IUnityOfWork _uof;
