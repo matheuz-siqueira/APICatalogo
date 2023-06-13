@@ -78,7 +78,14 @@ builder.Services.AddScoped(provider => new AutoMapper.MapperConfiguration(cfg =>
     cfg.AddProfile(new MappingProfile());
 }).CreateMapper());
 
+builder.Services.AddCors();
+
 var app = builder.Build();
+
+app.UseCors(policy => 
+policy.AllowAnyOrigin()
+    .AllowAnyMethod()
+    .AllowAnyHeader()); 
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
