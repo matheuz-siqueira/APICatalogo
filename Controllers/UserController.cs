@@ -5,8 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace APICatalogo.Controllers;
 
+[ApiVersion("1")]
 [ApiController]
-[Route("api/users")]
+[Route("api/v{version:apiVersion}/users")]
 public class UserController : ControllerBase
 {
     private readonly IUnityOfWork _uof;

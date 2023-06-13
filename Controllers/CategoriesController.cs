@@ -13,8 +13,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace APICatalogo.Controllers;
 
 
+[ApiVersion("1")]
 [ApiController]
-[Route("api/categories")]
+[Route("api/v{version:apiVersion}/categories")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class CategoriesController : ControllerBase
 {

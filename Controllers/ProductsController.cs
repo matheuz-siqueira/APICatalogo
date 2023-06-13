@@ -10,8 +10,9 @@ using System.Text.Json;
 
 namespace APICatalogo.Controllers;
 
+[ApiVersion("1")]
 [ApiController]
-[Route("api/products")]
+[Route("api/v{version:apiVersion}/products")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class ProductsController : ControllerBase
 {   

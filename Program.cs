@@ -4,6 +4,7 @@ using APICatalogo.Data;
 using APICatalogo.Mapper;
 using APICatalogo.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -39,13 +40,20 @@ builder.Services
   
 builder.Services.AddControllers().AddJsonOptions(options =>
   options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
   
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c => 
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "APICatalogo", Version = "v1"});
+    c.SwaggerDoc("v1", new OpenApiInfo 
+    {   Title = "APICatalogo", 
+        Version = "v1",
+        Contact = new OpenApiContact
+        {
+            Name = "Matheus Siqueira",
+            Email = "matheussiqueira.work@gmail.com"
+        } 
+    });
     
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
@@ -79,6 +87,19 @@ builder.Services.AddScoped(provider => new AutoMapper.MapperConfiguration(cfg =>
 }).CreateMapper());
 
 builder.Services.AddCors();
+
+builder.Services.AddApiVersioning(options => 
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.DefaultApiVersion = new ApiVersion(1, 0);
+    options.ReportApiVersions = true; 
+});
+
+builder.Services.AddVersionedApiExplorer( c =>
+{
+    c.GroupNameFormat = "'v'VVV";
+    c.SubstituteApiVersionInUrl = true;
+});
 
 var app = builder.Build();
 
