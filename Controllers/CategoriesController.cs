@@ -1,6 +1,4 @@
-using System.Data;
 using System.Text.Json;
-using APICatalogo.Data;
 using APICatalogo.DTOs;
 using APICatalogo.Models;
 using APICatalogo.Pagination;
@@ -12,7 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace APICatalogo.Controllers;
 
-
+[Produces("application/json")]
 [ApiVersion("1")]
 [ApiController]
 [Route("api/v{version:apiVersion}/categories")]
@@ -26,8 +24,13 @@ public class CategoriesController : ControllerBase
         _uof = uof;  
         _mapper = mapper;
     }
-
+    /// <summary> 
+    /// Obter caregorias
+    /// </summary>
+    /// <returns>Relação de categorias</returns>
+    /// <response code="200">Sucesso</response> 
     [HttpGet] 
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories(
         [FromQuery] CategoriesParameters categoriesParameters)
     {
@@ -44,17 +47,34 @@ public class CategoriesController : ControllerBase
         };
 
         Response.Headers.Add("X-Paginantion", JsonSerializer.Serialize(metadata));
-        return _mapper.Map<List<CategoryDto>>(categories);
+        var response =  _mapper.Map<List<CategoryDto>>(categories);
+        return Ok(response); 
     }
 
+    /// <summary> 
+    /// Obter produtos elencados por categoria
+    /// </summary>
+    /// <returns>Relação de categorias com seus produtos</returns>
+    /// <response code="200">Sucesso</response> 
     [HttpGet("products")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategoriesWithProducts()
     {
         var categories = await _uof.CategoryRepository.GetCategoriesProducts();
-        return _mapper.Map<List<CategoryDto>>(categories);
+        var response = _mapper.Map<List<CategoryDto>>(categories);
+        return Ok(response); 
     }
 
+    /// <summary> 
+    /// Obter caregoria por ID
+    /// </summary>
+    /// <param name="id">ID da categoria</param>
+    /// <returns>Categoria correspondente ao ID</returns>
+    /// <response code="200">Sucesso</response> 
+    /// <response code="404">Não encontrado</response>
     [HttpGet("{id:int}", Name="GetCategory")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<Category>> GetById([FromRoute] int id)
     {
         var category = await _uof.CategoryRepository.GetById(c => c.Id == id); 
@@ -65,7 +85,18 @@ public class CategoriesController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary> 
+    /// Cadastrar categoria
+    /// </summary>
+    /// <remarks>
+    /// {"id":0,"name":"string","imageUrl":"string"}
+    /// </remarks>
+    /// <returns>Categoria recém cadastrada</returns>
+    /// <response code="201">Sucesso</response> 
+    /// <response code="400">Erro de requisição</response>
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CategoryDto>> PostCategory([FromBody] CategoryDto request)
     {
         if(request is null)
@@ -79,7 +110,19 @@ public class CategoriesController : ControllerBase
         return new CreatedAtRouteResult("GetCategory", new {id = category.Id}, response);
     }
 
+    /// <summary> 
+    /// Atualizar categoria
+    /// </summary>
+    /// <remarks>
+    /// {"id":0,"name":"string","imageUrl":"string"}
+    /// </remarks>
+    /// <param name="id">ID da categoria</param>
+    /// <returns>Categoria recém cadastrada</returns>
+    /// <response code="200">Sucesso</response> 
+    /// <response code="404">Não encontrado</response>    
     [HttpPut("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<CategoryDto>> PutCategory(
             [FromRoute] int id, [FromBody] CategoryDto request)
     {
@@ -93,7 +136,16 @@ public class CategoriesController : ControllerBase
         return Ok(response);
     }
 
+    /// <summary> 
+    /// Deletar categoria
+    /// </summary>
+    /// <param name="id">ID da categoria</param>
+    /// <returns>Nada</returns>
+    /// <response code="204">Sucesso</response> 
+    /// <response code="404">Não encontrado</response> 
     [HttpDelete("{id:int}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult> DeleteCategory([FromRoute] int id)
     {
         var category = await _uof.CategoryRepository.GetById(c => c.Id == id);  

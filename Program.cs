@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using System.Text.Json.Serialization;
 using APICatalogo.Data;
@@ -54,6 +55,10 @@ builder.Services.AddSwaggerGen(c =>
             Email = "matheussiqueira.work@gmail.com"
         } 
     });
+
+    var xmlFile = "APICatalogo.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    c.IncludeXmlComments(xmlPath);
     
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
     {
@@ -112,7 +117,10 @@ policy.AllowAnyOrigin()
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "APICatalogo");
+    });
 }
 
 app.UseHttpsRedirection();
