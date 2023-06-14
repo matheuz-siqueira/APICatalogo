@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace APICatalogo.Controllers;
 
+[Produces("application/json")]
 [ApiVersion("1")]
 [ApiController]
 [Route("api/v{version:apiVersion}/users")]
@@ -18,7 +19,18 @@ public class UserController : ControllerBase
         _mapper = mapper; 
     }
 
+    /// <summary>
+    /// Cadastrar usuário
+    /// </summary> 
+    /// <remarks>
+    /// {"name":"string","email":"string","password":"string"}
+    /// </remarks>
+    /// <returns>Usuário cadastrado</returns> 
+    /// <response code="201">Sucesso</response>
+    /// <response code="400">Erro na requisição</response>      
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ResponseCreateUserJson>> PostUser([FromBody] RequestCreateUserJson request)
     { 
 
