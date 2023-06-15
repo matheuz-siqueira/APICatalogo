@@ -14,4 +14,9 @@ public class UserRepository : Repository<Models.User>, IUserRepository
     {
         return await Get().AsNoTracking().FirstOrDefaultAsync(user => user.Email == email);
     }
+
+    public async Task<Models.User> GetProfile(int id)
+    {
+        return await Get().AsNoTracking().FirstOrDefaultAsync(user => user.Id == id);
+    }
 }
