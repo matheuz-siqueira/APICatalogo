@@ -1,4 +1,5 @@
 using APICatalogo.DTOs;
+using APICatalogo.DTOs.Product;
 using APICatalogo.Models;
 using APICatalogo.Pagination;
 using APICatalogo.Repositories;
@@ -33,10 +34,10 @@ public class ProductsController : ControllerBase
     /// <response code="200">Sucesso</response> 
     [HttpGet("byprice")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetByPrice()
+    public async Task<ActionResult<IEnumerable<ResponseProductJson>>> GetByPrice()
     {
         var products = await _uof.ProductRepository.GetProductsByPrice();
-        var respones = _mapper.Map<List<ProductDto>>(products); 
+        var respones = _mapper.Map<List<ResponseProductJson>>(products); 
         return Ok(respones);
     }
 
@@ -47,7 +48,7 @@ public class ProductsController : ControllerBase
     /// <response code="200">Sucesso</response>
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<ProductDto>>> GetAll(
+    public async Task<ActionResult<IEnumerable<ResponseProductJson>>> GetAll(
         [FromQuery] ProductsParameters productsParameters)
     {   
         var products = await _uof.ProductRepository.GetProducts(productsParameters);
@@ -63,7 +64,7 @@ public class ProductsController : ControllerBase
 
         Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(metadata));
 
-        var response = _mapper.Map<List<ProductDto>>(products); 
+        var response = _mapper.Map<List<ResponseProductJson>>(products); 
         return Ok(response); 
     }
     
@@ -77,14 +78,14 @@ public class ProductsController : ControllerBase
     [HttpGet("{id:int}", Name="GetProduct")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ProductDto>> GetById([FromRoute] int id)
+    public async Task<ActionResult<ResponseProductJson>> GetById([FromRoute] int id)
     {
         var product = await _uof.ProductRepository.GetById(p => p.Id == id); 
         if(product is null)
             return NotFound();
         
 
-        var response = _mapper.Map<ProductDto>(product);    
+        var response = _mapper.Map<ResponseProductJson>(product);    
         return Ok(response);
     }   
 
@@ -99,12 +100,12 @@ public class ProductsController : ControllerBase
     /// <response code="201">Sucesso</response> 
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    public async Task<ActionResult> PostProduct([FromBody] ProductDto request)
+    public async Task<ActionResult> PostProduct([FromBody] RequestCreateProductJson request)
     {
         var product = _mapper.Map<Product>(request);
         _uof.ProductRepository.Add(product);
         await _uof.Commit();
-        var response = _mapper.Map<ProductDto>(product); 
+        var response = _mapper.Map<ResponseProductJson>(product); 
         return new CreatedAtRouteResult("GetProduct", new { id = product.Id }, response); 
     }
 
@@ -122,7 +123,7 @@ public class ProductsController : ControllerBase
     [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult> PutProduct([FromRoute] int id, [FromBody] ProductDto request)
+    public async Task<ActionResult> PutProduct([FromRoute] int id, [FromBody] RequestUpdateProductJson request)
     {
         if(id != request.Id)
             return NotFound();
@@ -130,7 +131,7 @@ public class ProductsController : ControllerBase
         var product = _mapper.Map<Product>(request); 
         _uof.ProductRepository.Update(product);
         await _uof.Commit();
-        var response = _mapper.Map<ProductDto>(product); 
+        var response = _mapper.Map<ResponseProductJson>(product); 
         return Ok(response);
     }
 

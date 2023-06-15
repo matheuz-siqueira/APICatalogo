@@ -1,4 +1,6 @@
 using APICatalogo.DTOs;
+using APICatalogo.DTOs.Category;
+using APICatalogo.DTOs.Product;
 using APICatalogo.DTOs.User;
 using AutoMapper;
 
@@ -18,13 +20,19 @@ public class MappingProfile : Profile
             .ForMember(destiny => destiny.Password, config => config.Ignore());
         
         CreateMap<RequestLoginJson, Models.User>();
-        CreateMap<CategoryDto, Models.Category>().ReverseMap(); 
-        CreateMap<ProductDto, Models.Product>().ReverseMap(); 
+        CreateMap<RequestCreateCategoryJson, Models.Category>();
+        CreateMap<RequestUpdateCategoryJson, Models.Category>().ReverseMap();
+        CreateMap<RequestCreateProductJson, Models.Product>();
+        CreateMap<RequestUpdateProductJson, Models.Product>();
+         
     }
 
     private void EntityForResponse()
     {
         CreateMap<Models.User, ResponseCreateUserJson>(); 
         CreateMap<Models.User, ResponseLoginJson>();
+        CreateMap<Models.Category, ResponseCategoryJson>();
+        CreateMap<Models.Category, ResponseCategoryProductsJson>(); 
+        CreateMap<Models.Product, ResponseProductJson>();
     }
 }

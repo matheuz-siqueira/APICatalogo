@@ -35,9 +35,12 @@ public class LoginController : ControllerBase
     /// {"email":"string","password":"string"}
     /// </remarks> 
     /// <returns>Token de acesso</returns>
-    /// <response code="200">Sucess</response>
+    /// <response code="200">Sucesso</response>
     /// <response code="404">Não encontrado</response>
     [HttpPost]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesDefaultResponseType]
     public async Task<ActionResult<ResponseLoginJson>> Login([FromBody] RequestLoginJson request)
     {
         var user = await _uof.UserRepository.GetByEmail(request.Email); 
