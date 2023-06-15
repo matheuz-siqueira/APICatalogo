@@ -1,5 +1,6 @@
 using System.Text.Json;
 using APICatalogo.DTOs;
+using APICatalogo.DTOs.Category;
 using APICatalogo.Models;
 using APICatalogo.Pagination;
 using APICatalogo.Repositories;
@@ -31,7 +32,7 @@ public class CategoriesController : ControllerBase
     /// <response code="200">Sucesso</response> 
     [HttpGet] 
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategories(
+    public async Task<ActionResult<IEnumerable<ResponseCategoryJson>>> GetCategories(
         [FromQuery] CategoriesParameters categoriesParameters)
     {
         var categories =  await _uof.CategoryRepository.GetCategories(categoriesParameters); 
@@ -47,7 +48,7 @@ public class CategoriesController : ControllerBase
         };
 
         Response.Headers.Add("X-Paginantion", JsonSerializer.Serialize(metadata));
-        var response =  _mapper.Map<List<CategoryDto>>(categories);
+        var response =  _mapper.Map<List<ResponseCategoryJson>>(categories);
         return Ok(response); 
     }
 
@@ -58,10 +59,10 @@ public class CategoriesController : ControllerBase
     /// <response code="200">Sucesso</response> 
     [HttpGet("products")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<CategoryDto>>> GetCategoriesWithProducts()
+    public async Task<ActionResult<IEnumerable<ResponseCategoryProductsJson>>> GetCategoriesWithProducts()
     {
         var categories = await _uof.CategoryRepository.GetCategoriesProducts();
-        var response = _mapper.Map<List<CategoryDto>>(categories);
+        var response = _mapper.Map<List<ResponseCategoryProductsJson>>(categories);
         return Ok(response); 
     }
 
@@ -75,13 +76,13 @@ public class CategoriesController : ControllerBase
     [HttpGet("{id:int}", Name="GetCategory")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Category>> GetById([FromRoute] int id)
+    public async Task<ActionResult<ResponseCategoryJson>> GetById([FromRoute] int id)
     {
         var category = await _uof.CategoryRepository.GetById(c => c.Id == id); 
         if(category is null)
             return NotFound("Categoria não encotrada.");
 
-        var response =  _mapper.Map<CategoryDto>(category);
+        var response =  _mapper.Map<ResponseCategoryJson>(category);
         return Ok(response);
     }
 
@@ -97,7 +98,8 @@ public class CategoriesController : ControllerBase
     [HttpPost]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<CategoryDto>> PostCategory([FromBody] CategoryDto request)
+    public async Task<ActionResult<ResponseCategoryJson>> PostCategory(
+        [FromBody] RequestCreateCategoryJson request)
     {
         if(request is null)
             return BadRequest(); 
@@ -106,7 +108,7 @@ public class CategoriesController : ControllerBase
         _uof.CategoryRepository.Add(category); 
         await _uof.Commit(); 
         
-        var response = _mapper.Map<CategoryDto>(category);
+        var response = _mapper.Map<ResponseCategoryJson>(category);
         return new CreatedAtRouteResult("GetCategory", new {id = category.Id}, response);
     }
 
@@ -117,14 +119,15 @@ public class CategoriesController : ControllerBase
     /// {"id":0,"name":"string","imageUrl":"string"}
     /// </remarks>
     /// <param name="id">ID da categoria</param>
+    /// <param name="request"></param>
     /// <returns>Categoria recém cadastrada</returns>
     /// <response code="200">Sucesso</response> 
     /// <response code="404">Não encontrado</response>    
     [HttpPut("{id:int}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<CategoryDto>> PutCategory(
-            [FromRoute] int id, [FromBody] CategoryDto request)
+    public async Task<ActionResult<ResponseCategoryJson>> PutCategory(
+            [FromRoute] int id, [FromBody] RequestUpdateCategoryJson request)
     {
         if(id != request.Id)
             return NotFound("Categoria não encontrada.");
@@ -132,7 +135,7 @@ public class CategoriesController : ControllerBase
         var category = _mapper.Map<Category>(request);
         _uof.CategoryRepository.Update(category);
         await _uof.Commit();
-        var response = _mapper.Map<CategoryDto>(category);
+        var response = _mapper.Map<ResponseCategoryJson>(category);
         return Ok(response);
     }
 

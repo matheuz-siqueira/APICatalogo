@@ -1,8 +1,6 @@
+namespace APICatalogo.DTOs.Product;
 
-
-namespace APICatalogo.DTOs;
-
-public class ProductDto
+public class RequestUpdateProductJson
 {
     public int Id { get; set; }    
     public string Name { get; set; }
