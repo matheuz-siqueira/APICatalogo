@@ -60,4 +60,23 @@ public class UserController : ControllerBase
         var response = _mapper.Map<ResponseUserProfileJson>(logged); 
         return Ok(response); 
     }
+
+    [Authorize]
+    [HttpPut("update-password")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> UpdatePassword([FromBody] RequestUpdatePasswordJson request)
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        var logged = await _uof.UserRepository.GetProfile(userId);
+        if(!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, logged.Password))
+        {
+            return BadRequest("Senha incorreta");
+        }
+        logged.Password = request.NewPassword; 
+        logged.Password = BCrypt.Net.BCrypt.HashPassword(logged.Password);
+        _uof.UserRepository.Update(logged); 
+        await _uof.Commit(); 
+        return NoContent(); 
+    }
 }
