@@ -31,8 +31,10 @@ public class MappingProfile : Profile
     {
         CreateMap<Models.User, ResponseCreateUserJson>(); 
         CreateMap<Models.User, ResponseLoginJson>();
+        CreateMap<Models.User, ResponseUserProfileJson>();
         CreateMap<Models.Category, ResponseCategoryJson>();
         CreateMap<Models.Category, ResponseCategoryProductsJson>(); 
         CreateMap<Models.Product, ResponseProductJson>();
+
     }
 }

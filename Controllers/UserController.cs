@@ -1,6 +1,8 @@
+using System.Security.Claims;
 using APICatalogo.DTOs.User;
 using APICatalogo.Repositories;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace APICatalogo.Controllers;
@@ -48,4 +50,14 @@ public class UserController : ControllerBase
         return StatusCode(201, response); 
     }
 
+    [Authorize]
+    [HttpGet("myprofile")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult<ResponseUserProfileJson>> GetProfile()
+    {
+        var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+        var logged = await _uof.UserRepository.GetProfile(userId); 
+        var response = _mapper.Map<ResponseUserProfileJson>(logged); 
+        return Ok(response); 
+    }
 }
