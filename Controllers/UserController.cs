@@ -30,7 +30,7 @@ public class UserController : ControllerBase
     /// <returns>Usuário cadastrado</returns> 
     /// <response code="201">Sucesso</response>
     /// <response code="400">Erro na requisição</response>      
-    [HttpPost]
+    [HttpPost("register")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ResponseCreateUserJson>> PostUser([FromBody] RequestCreateUserJson request)
@@ -50,6 +50,13 @@ public class UserController : ControllerBase
         return StatusCode(201, response); 
     }
 
+
+    /// <summary>
+    /// Obter dados do usuário logado
+    /// </summary> 
+    /// <returns>Usuário logado</returns> 
+    /// <response code="200">Sucesso</response>
+    /// <response code="401">Não autenticado</response> 
     [Authorize]
     [HttpGet("myprofile")]
     [ProducesResponseType(StatusCodes.Status200OK)]
@@ -61,6 +68,16 @@ public class UserController : ControllerBase
         return Ok(response); 
     }
 
+
+    /// <summary>
+    /// Alterar senha do usuário logado
+    /// </summary> 
+    /// <remarks>
+    /// {"currentPassword":"string","newPassword":"string"}
+    /// </remarks>
+    /// <returns>Sem retorno</returns> 
+    /// <response code="201">Sucesso</response>
+    /// <response code="400">Erro na requisição</response> 
     [Authorize]
     [HttpPut("update-password")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
