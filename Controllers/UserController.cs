@@ -76,7 +76,7 @@ public class UserController : ControllerBase
     /// {"currentPassword":"string","newPassword":"string"}
     /// </remarks>
     /// <returns>Sem retorno</returns> 
-    /// <response code="201">Sucesso</response>
+    /// <response code="204">Sucesso</response>
     /// <response code="400">Erro na requisição</response> 
     [Authorize]
     [HttpPut("update-password")]
