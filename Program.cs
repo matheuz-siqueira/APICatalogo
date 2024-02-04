@@ -37,6 +37,7 @@ builder.Services
             ValidateIssuer = false,
             ValidateAudience = false,
         };
+        
     });
 
   
@@ -108,6 +109,8 @@ builder.Services.AddVersionedApiExplorer( c =>
 });
 
 var app = builder.Build();
+
+app.UseCookiePolicy(new CookiePolicyOptions { MinimumSameSitePolicy = SameSiteMode.Strict });
 
 app.UseCors(policy => 
 policy.AllowAnyOrigin()
